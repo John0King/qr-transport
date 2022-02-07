@@ -1,0 +1,27 @@
+﻿@{
+    ViewBag.PageTitle = "柯诺摆渡平台";
+}
+<div class="d-flex flex-column align-items-center">
+
+    <div id="qrcode" class="mb-1" data-code="@ViewBag.Code"></div>
+    <div class="col-3 mb-1">
+        <span class="form-control">@ViewBag.Code</span>
+    </div>
+
+    <button class="btn btn-light">刷新</button>
+</div>
+
+@section Scripts
+{
+<script src="~/lib/qrcodejs/qrcode.js"></script>
+<script>
+    var qrcode = new QRCode(document.getElementById("qrcode"), {
+        text: "http://jindo.dev.naver.com/collie",
+        width: 128,
+        height: 128,
+        colorDark : "#000000",
+        colorLight : "#ffffff",
+        correctLevel : QRCode.CorrectLevel.H
+    });
+</script>
+}
