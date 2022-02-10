@@ -23,11 +23,12 @@ namespace KN.SafeCommunicationPlatform.Protocols.TransportLayer
             var packet = new Packet();
             packet.SessionId = BinaryPrimitives.ReadUInt32BigEndian(packetStream.Slice(0, 4));
             packet.PacketId = BinaryPrimitives.ReadUInt32BigEndian(packetStream.Slice(4, 4));
-            packet.OpCode = (OpCode)BinaryPrimitives.ReadUInt32BigEndian(packetStream.Slice(8, 4));
+            packet.OpCode = (OpCode)BinaryPrimitives.ReadUInt16BigEndian(packetStream.Slice(8, 2));
+            packet.EndOfMessage = Convert.ToBoolean(BinaryPrimitives.ReadUInt16LittleEndian(packetStream.Slice(10,2)));
             packet.PacketSize = BinaryPrimitives.ReadUInt32BigEndian(packetStream.Slice(12, 4));
             packet.Payload = packetStream.Slice(16,(int)packet.PacketSize).ToArray();
 
-            byteRead = 4 + 4 + 4 + 4 + (int)packet.PacketSize;
+            byteRead = 4 + 4 + 2 + 2 + 4 + (int)packet.PacketSize;
             return packet;
         }
 

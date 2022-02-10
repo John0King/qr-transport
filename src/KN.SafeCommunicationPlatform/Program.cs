@@ -1,4 +1,5 @@
 using KN.SafeCommunicationPlatform.Hubs;
+using System.Buffers;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -21,10 +22,19 @@ app.UseAuthorization();
 app.MapControllers();
 app.UseEndpoints(builder =>
 {
-    app.MapDefaultControllerRoute();
-    app.MapHub<SafeCommunicationHub>("xHub");
+    builder.MapDefaultControllerRoute();
+    builder.MapHub<SafeCommunicationHub>("xHub");
+    //builder.Map("/ws", async context =>
+    //{
+    //    if (context.WebSockets.IsWebSocketRequest)
+    //    {
+    //        var ws = await context.WebSockets.AcceptWebSocketAsync();
+    //        var mem = MemoryPool<byte>.Shared.Rent(2048);
+    //        var result = await ws.ReceiveAsync(mem.Memory, context.RequestAborted);
+    //        ws.SendAsync()
+    //    }
+    //});
 });
-
 
 
 

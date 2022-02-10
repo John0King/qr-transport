@@ -13,20 +13,28 @@ namespace KN.SafeCommunicationPlatform.Protocols.TransportLayer
         {
             _builder = builder;
         }
-        private IQrHandler? _qrHander;
         private readonly Func<QrConnection> _builder;
-
-        public IQrConnectionBuilder WithQrHandler(IQrHandler qrHandler)
-        {
-            _qrHander = qrHandler;
-            return this;
-        }
+        private IQrReader? _qrReader;
+        private IQrWriter? _qrWriter;
 
         public QrConnection Build()
         {
             var conn = _builder();
-            conn.QrHandler = _qrHander!;
+            conn.QrReader = _qrReader!;
+            conn.QrWriter = _qrWriter!;
             return conn;
+        }
+
+        public IQrConnectionBuilder WithQrReader(IQrReader qrReader)
+        {
+            _qrReader = qrReader;
+            return this;
+        }
+
+        public IQrConnectionBuilder WithQrWriter(IQrWriter qrWriter)
+        {
+            _qrWriter = qrWriter;
+            return this;
         }
     }
 }

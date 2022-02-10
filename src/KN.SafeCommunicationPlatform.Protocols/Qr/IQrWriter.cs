@@ -8,6 +8,6 @@ namespace KN.SafeCommunicationPlatform.Protocols.Qr
 {
     public interface IQrWriter
     {
-        void WriteQrData(Span<byte> qrData);
+        void WriteQrData(ReadOnlySpan<byte> qrData);
     }
 }
