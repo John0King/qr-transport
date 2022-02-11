@@ -21,4 +21,12 @@
     <ProjectReference Include="..\KN.SafeCommunicationPlatform.Protocols\KN.SafeCommunicationPlatform.Protocols.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Update="runtimes\**\*.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <Pack>true</Pack>
+      <PackagePath>native</PackagePath>
+    </None>
+  </ItemGroup>
+
 </Project>

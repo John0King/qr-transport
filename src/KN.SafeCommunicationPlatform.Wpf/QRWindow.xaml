@@ -17,16 +17,29 @@
             <StackPanel Orientation="Horizontal" DockPanel.Dock="Top" VerticalAlignment="Top">
                 <Button Height="40" HorizontalAlignment="Center" Padding="50,0" Click="ConnectButton_Click" IsEnabled="{Binding IsCanConnect}">连接</Button>
                 <Button Height="40" HorizontalAlignment="Center" Padding="50,0" IsEnabled="{Binding IsCanDisConnect}">断开</Button>
-                <Button Height="40" HorizontalAlignment="Center" Padding="50,0" Click="Button_Click" >生成二维码</Button>
-                <Button Height="40" HorizontalAlignment="Center" Padding="50,0" Click="Button_Click_1" >读取</Button>
             </StackPanel>
             <StackPanel>
-                <Label>原 （base64）</Label>
-                <TextBox x:Name="obxt" TextWrapping="Wrap"  Height="90"></TextBox>
-                <Label>文本</Label>
-                <TextBox x:Name="txt" TextWrapping="Wrap" Height="90"></TextBox>
-                <Label>二进制 （base64）</Label>
-                <TextBox x:Name="bxt" TextWrapping="Wrap"  Height="90"></TextBox>
+                <Label>QR Sending (Base64）</Label>
+                <TextBox x:Name="qr_s_txt" TextWrapping="Wrap"  Height="90"></TextBox>
+                <Label>QR Receive （Base64）</Label>
+                <TextBox x:Name="qr_r_txt" TextWrapping="Wrap"  Height="90"></TextBox>
+                <Label>发送消息</Label>
+                <Grid Height="100">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="100"/>
+                    </Grid.ColumnDefinitions>
+                    <TextBox x:Name="SendDataBox" />
+                    <Button Grid.Column="1">发送</Button>
+                </Grid>
+                <Label>收到消息</Label>
+                <Grid Height="100">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="100"/>
+                    </Grid.ColumnDefinitions>
+                    <TextBox x:Name="ReveidData" />
+                </Grid>
             </StackPanel>
         </DockPanel>
         <Border Grid.Column="1" BorderBrush="black" BorderThickness="1,0,0,0" ClipToBounds="True">

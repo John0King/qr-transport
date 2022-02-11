@@ -19,6 +19,8 @@ namespace KN.SafeCommunicationPlatform.Protocols.TransportLayer
         public uint PacketSize;
         [MarshalAs(UnmanagedType.ByValArray,SizeConst = 984)]
         public byte[] Payload;
+
+        public static int MaxPayload => 984;
     }
 
     public enum OpCode : ushort

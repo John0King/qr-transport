@@ -28,11 +28,12 @@ namespace KN.SafeCommunicationPlatform.Protocols
         public ValueTask ListenAsync()
         {
             _transportHandler = _transportHandler??new TransportHandler(QrReader, QrWriter);
+            _ = _transportHandler.StartListenAsync();
             return ValueTask.CompletedTask;
         }
         public async ValueTask ConnectAsync(CancellationToken cancellationToken = default)
         {
-            _transportHandler = new TransportHandler(QrReader, QrWriter);
+            _transportHandler = _transportHandler ?? new TransportHandler(QrReader, QrWriter);
 
             _ = _transportHandler.StartListenAsync();
             //_ = _transportHandler.StartSendAsync();

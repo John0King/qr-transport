@@ -10,6 +10,9 @@ using System.Threading.Tasks;
 
 namespace KN.SafeCommunicationPlatform.Wpf.Qr
 {
+    /// <summary>
+    /// Usb扫码器读取器
+    /// </summary>
     public class UsbQrGunReader : IQrReader
     {
         private readonly Vbarapi _vbarApi = new Vbarapi();
@@ -29,12 +32,16 @@ namespace KN.SafeCommunicationPlatform.Wpf.Qr
                 }
                 if (_vbarApi.GetResultStr(out var result, out var size))
                 {
-                    yield return new Memory<byte>(result);
+                    if (result.Length > 0)
+                    {
+                        yield return new Memory<byte>(result);
+                    }
+
                 }
-                await Task.Delay(10);
+                await Task.Delay(2);
             }
             StopRead();
-            
+
         }
 
         public void StartRead()

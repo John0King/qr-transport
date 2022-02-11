@@ -1,4 +1,5 @@
-﻿using KN.SafeCommunicationPlatform.Protocols.Qr;
+﻿using KN.SafeCommunicationPlatform.Protocols.Internal;
+using KN.SafeCommunicationPlatform.Protocols.Qr;
 using System;
 using System.Buffers.Binary;
 using System.Collections.Generic;
@@ -12,7 +13,7 @@ namespace KN.SafeCommunicationPlatform.Protocols.TransportLayer
     public class PacketReader
     {
         private readonly IQrReader _qrReader;
-
+        private readonly LossSet _remoteId = new LossSet(3);
         public PacketReader(IQrReader qrReader)
         {
             _qrReader = qrReader;
@@ -36,10 +37,23 @@ namespace KN.SafeCommunicationPlatform.Protocols.TransportLayer
         public async IAsyncEnumerable<Packet> GetPacketStream([EnumeratorCancellation] CancellationToken cancellationToken = default)
         {
             _qrReader.StartRead();
+            cancellationToken.Register(()=> _qrReader.StopRead());
             await foreach(var mem in _qrReader.GetQrStream(cancellationToken))
             {
-                var packet = Read(mem.Span, out _);
-                yield return packet;
+                Packet packet;
+                try
+                {
+                    packet = Read(mem.Span, out _);
+                }
+                catch(Exception ex)
+                {
+                    throw new InvalidDataException("Packet Can not be deserialzed",ex);
+                }
+                if (!_remoteId.Has(packet.PacketId))
+                {
+                    yield return packet;
+                }
+                await Task.Delay(10);
             }
         }
     }

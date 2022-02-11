@@ -82,7 +82,12 @@ namespace KN.SafeCommunicationPlatform.Protocols.TransportLayer
             
         }
 
+        public event Action<Exception>? ErrorFired;
 
+        private void OnError(Exception e)
+        {
+            ErrorFired?.Invoke(e);
+        }
         public Task StartListenAsync()
         {
             _currentPacket = 0;
@@ -97,6 +102,10 @@ namespace KN.SafeCommunicationPlatform.Protocols.TransportLayer
                     if (_remoteSet.Has(packet.PacketId))
                     {
                         continue;
+                    }
+                    if(packet.PacketId != _localSet.GetLast() + 1)
+                    {
+                        
                     }
                     _remoteSet.Put(packet.PacketId);
                     

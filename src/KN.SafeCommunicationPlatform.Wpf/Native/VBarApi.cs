@@ -50,7 +50,11 @@ namespace KN.SafeCommunicationPlatform.Wpf.Native
 
         }
         byte[] iSetByte_ctl = new byte[64];
-        //扫码开关
+
+        /// <summary>
+        /// 扫码开关
+        /// </summary>
+        /// <param name="cswitch"></param>
         public void ControlScan(bool cswitch)
         {
             if (dev != IntPtr.Zero)

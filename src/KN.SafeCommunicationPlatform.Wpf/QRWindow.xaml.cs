@@ -35,9 +35,20 @@ namespace KN.SafeCommunicationPlatform.Wpf
 
             _qrWriter = new SkiaQrWriter((map) => this.QrBitmap = map);
             IsCanConnect = true;
+            Loaded += Init;
         }
 
-        public static DependencyProperty QrBitmapProperty = DependencyProperty.Register(nameof(QrBitmap), typeof(SKBitmap), typeof(QRWindow));
+        private async void Init(object? sender, EventArgs e)
+        {
+            qrConnection?.Dispose();
+            qrConnection = QrConnection.CreateBuilder()
+                .WithQrWriter(_qrWriter)
+                .WithQrReader(_qrGunReader)
+                .Build();
+            await qrConnection.ListenAsync();
+        }
+
+       
 
         public bool IsCanConnect
         {
@@ -61,8 +72,9 @@ namespace KN.SafeCommunicationPlatform.Wpf
         public static readonly DependencyProperty IsCanDisConnectProperty =
            DependencyProperty.Register(nameof(IsCanDisConnect), typeof(bool), typeof(QRWindow), new PropertyMetadata(false));
 
-        public SKBitmap QrBitmap 
-        { 
+        public static DependencyProperty QrBitmapProperty = DependencyProperty.Register(nameof(QrBitmap), typeof(SKBitmap), typeof(QRWindow));
+        public SKBitmap QrBitmap
+        {
             get
             {
                 return (SKBitmap)GetValue(QrBitmapProperty);
@@ -71,6 +83,7 @@ namespace KN.SafeCommunicationPlatform.Wpf
             {
                 SetValue(QrBitmapProperty, value);
                 SkViewer.InvalidateVisual();
+                DecodeQr(value);
             }
         }
 
@@ -88,23 +101,23 @@ namespace KN.SafeCommunicationPlatform.Wpf
 
         private async void ConnectButton_Click(object sender, RoutedEventArgs e)
         {
-            qrConnection?.Dispose();
-            qrConnection = QrConnection.CreateBuilder()
-                .WithQrWriter(_qrWriter)
-                .WithQrReader(_qrGunReader)
-                .Build();
-            await qrConnection.ConnectAsync();
+            try
+              {
+                if (qrConnection != null)
+                {
+                    await qrConnection.ConnectAsync();
+                }
+
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message);
+            }
         }
 
-        private void Button_Click(object sender, RoutedEventArgs e)
-        {
-            var x = new byte[24];
-            System.Security.Cryptography.RandomNumberGenerator.Fill(x.AsSpan());
-            obxt.Text = Convert.ToBase64String(x);
-            _qrWriter.WriteQrData(x);
-        }
+        
 
-        private void Button_Click_1(object sender, RoutedEventArgs e)
+        private void DecodeQr(SKBitmap bitmap)
         {
             var reader = new ZXing.SkiaSharp.BarcodeReader()
             {
@@ -114,9 +127,8 @@ namespace KN.SafeCommunicationPlatform.Wpf
                 }
             };
             var result = reader.Decode(this.QrBitmap);
-            this.txt.Text = result.Text;
-            this.bxt.Text = Convert.ToBase64String(((List<byte[]>)result.ResultMetadata[ZXing.ResultMetadataType.BYTE_SEGMENTS])
-                .SelectMany(x=>x).ToArray());
+            this.qr_s_txt.Text = Convert.ToBase64String(((List<byte[]>)result.ResultMetadata[ZXing.ResultMetadataType.BYTE_SEGMENTS])
+                .SelectMany(x => x).ToArray());
         }
     }
 }
