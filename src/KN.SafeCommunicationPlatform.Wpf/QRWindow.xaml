@@ -45,7 +45,7 @@
         <Border Grid.Column="1" BorderBrush="black" BorderThickness="1,0,0,0" ClipToBounds="True">
             <Canvas >
                 <!--<Image x:Name="Qr" Width="300" Height="300" Canvas.Top="0" Canvas.Right="0" Source="{Binding QrBitmap, ElementName=window}" ></Image>-->
-                <sk:SKElement x:Name="SkViewer" Canvas.Top="0" Canvas.Right="0" 
+                <sk:SKElement x:Name="SkViewer" Canvas.Bottom="0" Canvas.Right="0" 
                               Width="{Binding ActualWidth, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type Canvas}}}" 
                               Height="{Binding ActualWidth, Mode=OneWay, RelativeSource={RelativeSource Self}}" PaintSurface="SKElement_PaintSurface" />
 

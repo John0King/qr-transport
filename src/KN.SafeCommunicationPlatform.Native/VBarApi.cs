@@ -5,7 +5,7 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace KN.SafeCommunicationPlatform.Wpf.Native
+namespace KN.SafeCommunicationPlatform.Native
 {
     public class Vbarapi
     {
@@ -25,7 +25,7 @@ namespace KN.SafeCommunicationPlatform.Wpf.Native
         public static extern void vbar_channel_close(IntPtr dev);
 
 
-        
+
 
         //连接设备
         public bool OpenDevice()

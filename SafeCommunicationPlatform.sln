@@ -10,6 +10,7 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{1210660F-ECDA-45AA-AAB4-9DC09396F214}"
 	ProjectSection(SolutionItems) = preProject
 		.editorconfig = .editorconfig
+		nuget.config = nuget.config
 	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "KN.SafeCommunicationPlatform.Protocols", "src\KN.SafeCommunicationPlatform.Protocols\KN.SafeCommunicationPlatform.Protocols.csproj", "{1257FB74-7CC8-435C-A82E-A2F7D08EA6E9}"
@@ -18,7 +19,11 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{9CDB7B92-6
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "KN.SafeCommnunicationPlatform.Protocols.Test", "test\KN.SafeCommnunicationPlatform.Protocols.Test\KN.SafeCommnunicationPlatform.Protocols.Test.csproj", "{A55EF13C-8CE3-4EDD-AD77-093A58712167}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KN.SafeCommunicationPlatform.Wpf", "src\KN.SafeCommunicationPlatform.Wpf\KN.SafeCommunicationPlatform.Wpf.csproj", "{3505421C-57AD-408D-A3DC-A3DA64246A01}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "KN.SafeCommunicationPlatform.Wpf", "src\KN.SafeCommunicationPlatform.Wpf\KN.SafeCommunicationPlatform.Wpf.csproj", "{3505421C-57AD-408D-A3DC-A3DA64246A01}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "KN.SafeCommunicationPlatform.EF", "src\KN.SafeCommunicationPlatform.EF\KN.SafeCommunicationPlatform.EF.csproj", "{0725E9DF-391A-4114-ACF5-B7CCFBC145F4}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KN.SafeCommunicationPlatform.Native", "src\KN.SafeCommunicationPlatform.Native\KN.SafeCommunicationPlatform.Native.csproj", "{5822CC2F-2987-476F-8185-37ED79B0AEAB}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -42,6 +47,14 @@ Global
 		{3505421C-57AD-408D-A3DC-A3DA64246A01}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{3505421C-57AD-408D-A3DC-A3DA64246A01}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{3505421C-57AD-408D-A3DC-A3DA64246A01}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0725E9DF-391A-4114-ACF5-B7CCFBC145F4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0725E9DF-391A-4114-ACF5-B7CCFBC145F4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0725E9DF-391A-4114-ACF5-B7CCFBC145F4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0725E9DF-391A-4114-ACF5-B7CCFBC145F4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5822CC2F-2987-476F-8185-37ED79B0AEAB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5822CC2F-2987-476F-8185-37ED79B0AEAB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5822CC2F-2987-476F-8185-37ED79B0AEAB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5822CC2F-2987-476F-8185-37ED79B0AEAB}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -51,6 +64,8 @@ Global
 		{1257FB74-7CC8-435C-A82E-A2F7D08EA6E9} = {BC722766-2CC1-43B9-81E9-499E37D60A39}
 		{A55EF13C-8CE3-4EDD-AD77-093A58712167} = {9CDB7B92-6EF2-4E9D-AB91-7B8B1AF96A0D}
 		{3505421C-57AD-408D-A3DC-A3DA64246A01} = {BC722766-2CC1-43B9-81E9-499E37D60A39}
+		{0725E9DF-391A-4114-ACF5-B7CCFBC145F4} = {BC722766-2CC1-43B9-81E9-499E37D60A39}
+		{5822CC2F-2987-476F-8185-37ED79B0AEAB} = {BC722766-2CC1-43B9-81E9-499E37D60A39}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {8866886B-1527-4D29-97F0-D0299902483F}

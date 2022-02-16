@@ -1,4 +1,5 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
+using KN.SafeCommunicationPlatform.EF;
 using KN.SafeCommunicationPlatform.Protocols;
 using KN.SafeCommunicationPlatform.Wpf.Qr;
 using SkiaSharp;
@@ -26,29 +27,54 @@ namespace KN.SafeCommunicationPlatform.Wpf
     public partial class QRWindow : Window
     {
         private readonly SkiaQrWriter _qrWriter;
-        private readonly UsbQrGunReader _qrGunReader = new UsbQrGunReader();
+        private readonly UsbQrGunReader _qrGunReader;
         private QrConnection? qrConnection;
+        private AppDbContext? db;
         public QRWindow()
         {
             this.DataContext = this;
             InitializeComponent();
 
             _qrWriter = new SkiaQrWriter((map) => this.QrBitmap = map);
+            _qrGunReader =  new UsbQrGunReader();
+            _qrGunReader.Readed += OnQrRead;
             IsCanConnect = true;
             Loaded += Init;
         }
 
         private async void Init(object? sender, EventArgs e)
         {
+            
             qrConnection?.Dispose();
             qrConnection = QrConnection.CreateBuilder()
                 .WithQrWriter(_qrWriter)
                 .WithQrReader(_qrGunReader)
                 .Build();
             await qrConnection.ListenAsync();
+
         }
 
+        private Task StartSendingQueue()
+        {
+            return Task.Factory.StartNew(() =>
+            {
+
+            },TaskCreationOptions.LongRunning);
+        }
+
+        private async Task StartReceiveQuene()
+        {
+
+        }
        
+        private void OnQrRead(byte[] buffer)
+        {
+            Dispatcher.Invoke(() =>
+            {
+                this.qr_r_txt.Text = Convert.ToBase64String(buffer);
+            });
+            
+        }
 
         public bool IsCanConnect
         {

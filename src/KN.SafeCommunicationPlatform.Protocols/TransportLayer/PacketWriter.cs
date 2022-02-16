@@ -34,7 +34,7 @@ namespace KN.SafeCommunicationPlatform.Protocols.TransportLayer
         /// <param name="packet"></param>
         /// <param name="destination">应为1040字节 </param>
         /// <returns>byte write</returns>
-        public int Write(ref Packet packet,Span<byte> destination)
+        internal int Write(ref Packet packet,Span<byte> destination)
         {
             int byteWrite = 0;
             BinaryPrimitives.WriteUInt32BigEndian(destination.Slice(0, 4), packet.SessionId);

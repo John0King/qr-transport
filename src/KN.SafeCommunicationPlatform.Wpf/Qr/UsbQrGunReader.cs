@@ -1,5 +1,5 @@
 ﻿using KN.SafeCommunicationPlatform.Protocols.Qr;
-using KN.SafeCommunicationPlatform.Wpf.Native;
+using KN.SafeCommunicationPlatform.Native;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -22,18 +22,21 @@ namespace KN.SafeCommunicationPlatform.Wpf.Qr
             this.StopRead();
         }
 
+        public event Action<byte[]>? Readed;
+
         public async IAsyncEnumerable<Memory<byte>> GetQrStream([EnumeratorCancellation] CancellationToken cancellationToken = default)
         {
             while (true)
             {
                 if (cancellationToken.IsCancellationRequested || CancellationTokenSource?.IsCancellationRequested == true)
                 {
-                    break;
+                   break;
                 }
                 if (_vbarApi.GetResultStr(out var result, out var size))
                 {
                     if (result.Length > 0)
                     {
+                        Readed?.Invoke(result);
                         yield return new Memory<byte>(result);
                     }
 

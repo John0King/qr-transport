@@ -12,6 +12,8 @@ namespace KN.SafeCommunicationPlatform.Protocols.TransportLayer
         private readonly PacketReader _reader;
         private readonly PacketWriter _writer;
         private readonly LossSet _cursor = new LossSet(4);
+        private readonly SemaphoreSlim _semaphoreSlim = new SemaphoreSlim(0,1);
+        private readonly byte[] Empty = Array.Empty<byte>();
 
         public PacketTransportHandler(PacketReader reader, PacketWriter writer)
         {
@@ -49,6 +51,10 @@ namespace KN.SafeCommunicationPlatform.Protocols.TransportLayer
             var respose = tor.Current;
             if(respose.OpCode == OpCode.Ack)
             {
+                if(respose.PacketId != _cursor.GetLast())
+                {
+                    Console.WriteLine($"Error, ack {respose.PacketId} is not for send{_cursor.GetLast()}");
+                }
                 return;
             }
             throw new InvalidDataException($"Wait for {OpCode.Ack},but get {respose.OpCode}");
@@ -56,15 +62,24 @@ namespace KN.SafeCommunicationPlatform.Protocols.TransportLayer
 
         public async ValueTask SendPing(Packet packet)
         {
-            _writer.WritePacket(ref packet);
-            var tor = _reader.GetPacketStream().GetAsyncEnumerator();
-            await tor.MoveNextAsync();
-            var respose = tor.Current;
-            if (respose.OpCode == OpCode.Ack)
+            try
             {
-                return;
+                await _semaphoreSlim.WaitAsync();
+                _writer.WritePacket(ref packet);
+                var tor = _reader.GetPacketStream().GetAsyncEnumerator();
+                await tor.MoveNextAsync();
+                await tor.DisposeAsync();
+                var respose = tor.Current;
+                if (respose.OpCode == OpCode.Ack)
+                {
+                    return;
+                }
+                throw new InvalidDataException($"Wait for {OpCode.Pong},but get {respose.OpCode}");
             }
-            throw new InvalidDataException($"Wait for {OpCode.Pong},but get {respose.OpCode}");
+            finally
+            {
+                _semaphoreSlim.Release();
+            }
         }
 
         
@@ -76,12 +91,47 @@ namespace KN.SafeCommunicationPlatform.Protocols.TransportLayer
         }
 
 
-        public async ValueTask<Memory<byte>> ReceiveAsync()
+        public async ValueTask<QrReceiveResult> ReceiveAsync(Memory<byte> buffer)
         {
-            var tor = _reader.GetPacketStream().GetAsyncEnumerator();
-            await tor.MoveNextAsync();
-            var respose = tor.Current;
-            throw new NotImplementedException();
+            try
+            {
+                await _semaphoreSlim.WaitAsync();
+                var tor = _reader.GetPacketStream().GetAsyncEnumerator();
+                await tor.MoveNextAsync();
+                var respose = tor.Current;
+                _cursor.Put(respose.PacketId);
+                await tor.DisposeAsync();
+                if (respose.OpCode == OpCode.Send)
+                {
+                    respose.Payload.AsMemory().CopyTo(buffer);
+                    var ack = new Packet
+                    {
+                        SessionId = 0,
+                        PacketId = _cursor.GetLast(),
+                        PacketSize = 0,
+                        EndOfMessage = true,
+                        OpCode = OpCode.Ack,
+                        Payload = this.Empty
+                    };
+                    _writer.WritePacket(ref ack);
+                    await Task.Delay(500);//等待对方确认
+                    return new QrReceiveResult((int)respose.PacketSize, MessageType.Binary, respose.EndOfMessage);
+                }
+                else if(respose.OpCode == OpCode.Close)
+                {
+                    return new QrReceiveResult(0, MessageType.Close, true);
+                }
+                else
+                {
+                    throw new InvalidOperationException($"opcode:{respose.OpCode} should not be handled here");
+                }
+            }
+            finally
+            {
+                _semaphoreSlim.Release();
+            }
+            
+            
         }
     }
 }

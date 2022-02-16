@@ -7,6 +7,9 @@
     <UseWPF>true</UseWPF>
   </PropertyGroup>
 
+
+
+
   <ItemGroup>
     <PackageReference Include="CommunityToolkit.Mvvm" Version="8.0.0-preview1" />
     <PackageReference Include="OpenCvSharp4.Windows" Version="4.5.5.20211231" />
@@ -15,18 +18,12 @@
     <PackageReference Include="System.Drawing.Common" Version="6.0.0" />
     <PackageReference Include="ZXing.Net.Bindings.OpenCV.V4" Version="0.16.8" />
     <PackageReference Include="ZXing.Net.Bindings.SkiaSharp" Version="0.16.12" />
+    <PackageReference Include="KN.SafeCommunicationPlatform.Native" Version="*" />
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\KN.SafeCommunicationPlatform.EF\KN.SafeCommunicationPlatform.EF.csproj" />
     <ProjectReference Include="..\KN.SafeCommunicationPlatform.Protocols\KN.SafeCommunicationPlatform.Protocols.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <None Update="runtimes\**\*.dll">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      <Pack>true</Pack>
-      <PackagePath>native</PackagePath>
-    </None>
   </ItemGroup>
 
 </Project>
