@@ -45,7 +45,7 @@ namespace KN.SafeCommunicationPlatform.Protocols.TransportLayer
         
         public async ValueTask SendDataCore(Packet packet)
         {
-            _writer.WritePacket(ref packet);
+            await _writer.WritePacket(packet);
             var tor = _reader.GetPacketStream().GetAsyncEnumerator();
             await tor.MoveNextAsync();
             var respose = tor.Current;
@@ -65,7 +65,7 @@ namespace KN.SafeCommunicationPlatform.Protocols.TransportLayer
             try
             {
                 await _semaphoreSlim.WaitAsync();
-                _writer.WritePacket(ref packet);
+                await _writer.WritePacket(packet);
                 var tor = _reader.GetPacketStream().GetAsyncEnumerator();
                 await tor.MoveNextAsync();
                 await tor.DisposeAsync();
@@ -86,7 +86,7 @@ namespace KN.SafeCommunicationPlatform.Protocols.TransportLayer
 
         public async ValueTask SendPong(Packet packet)
         {
-            _writer.WritePacket(ref packet);
+            await _writer.WritePacket(packet);
             await Task.Delay(500);
         }
 
@@ -113,7 +113,7 @@ namespace KN.SafeCommunicationPlatform.Protocols.TransportLayer
                         OpCode = OpCode.Ack,
                         Payload = this.Empty
                     };
-                    _writer.WritePacket(ref ack);
+                    await _writer.WritePacket(ack);
                     await Task.Delay(500);//等待对方确认
                     return new QrReceiveResult((int)respose.PacketSize, MessageType.Binary, respose.EndOfMessage);
                 }

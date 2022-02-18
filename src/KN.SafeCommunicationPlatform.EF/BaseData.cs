@@ -41,10 +41,7 @@ namespace KN.SafeCommunicationPlatform.EF
         /// </summary>
         public bool Processed { get; set; }
 
-        /// <summary>
-        /// 是否正在处理
-        /// </summary>
-        public bool Processing { get; set; }
+        public DateTimeOffset? ProcessingTime { get; set; }
 
         /// <summary>
         /// 处理时间
@@ -55,5 +52,14 @@ namespace KN.SafeCommunicationPlatform.EF
         /// 添加时间
         /// </summary>
         public DateTimeOffset AddTime { get; set; } = DateTimeOffset.Now;
+
+        public bool IsProcessing(TimeSpan offset)
+        {
+            if (this.ProcessingTime.HasValue)
+            {
+                return DateTimeOffset.Now - this.ProcessingTime.Value <= offset;
+            }
+            return false;
+        }
     }
 }

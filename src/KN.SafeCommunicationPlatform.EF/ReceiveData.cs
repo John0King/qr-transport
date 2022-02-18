@@ -10,7 +10,7 @@ namespace KN.SafeCommunicationPlatform.EF
     /// <summary>
     /// 接收队列
     /// </summary>
-    [Table(nameof(SendingData))]
+    [Table(nameof(ReceiveData))]
     public class ReceiveData :BaseData
     {
        
@@ -27,7 +27,7 @@ namespace KN.SafeCommunicationPlatform.EF
                 BinaryData = BinaryData,
                 AddTime = AddTime,
                 Processed = false,
-                Processing = false,
+                ProcessingTime = null,
                 ProcessTime = null
             };
         }

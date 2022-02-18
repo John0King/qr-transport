@@ -51,6 +51,7 @@ namespace KN.SafeCommunicationPlatform.Protocols.TransportLayer
                 }
                 if (!_remoteId.Has(packet.PacketId))
                 {
+                    _remoteId.Put(packet.PacketId);
                     yield return packet;
                 }
                 await Task.Delay(10);

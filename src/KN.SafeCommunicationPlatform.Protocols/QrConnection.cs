@@ -19,27 +19,19 @@ namespace KN.SafeCommunicationPlatform.Protocols
 
         private QrConnection() { }
 
-        public QrConnectionState State { get; private set; }
+        public QrConnectionState State => _transportHandler?.State ?? QrConnectionState.Closed;
         public static IQrConnectionBuilder CreateBuilder()
         {
             return new QrConnectionBuilder(()=>new QrConnection());
         }
 
-        public ValueTask ListenAsync()
-        {
-            _transportHandler = _transportHandler??new TransportHandler(QrReader, QrWriter);
-            _ = _transportHandler.StartListenAsync();
-            return ValueTask.CompletedTask;
-        }
+        
         public async ValueTask ConnectAsync(CancellationToken cancellationToken = default)
         {
             _transportHandler = _transportHandler ?? new TransportHandler(QrReader, QrWriter);
 
-            _ = _transportHandler.StartListenAsync();
-            //_ = _transportHandler.StartSendAsync();
-            _transportHandler.SendPing();
-            await _transportHandler.WaitPongAsync(cancellationToken);
-            State = QrConnectionState.Connected;
+            await _transportHandler.Listen();
+            //await _transportHandler.PingAsync();
         }
 
         public void Dispose()
@@ -55,7 +47,7 @@ namespace KN.SafeCommunicationPlatform.Protocols
             {
                 throw new InvalidOperationException("Connection is not connected");
             }
-            await _transportHandler.SendData(buffer, endOfMessage, cancellationToken);
+            await _transportHandler.Send(buffer, endOfMessage, cancellationToken);
         }
 
         public async ValueTask<QrReceiveResult> ReceiveAsync(Memory<byte> buffer, CancellationToken cancellationToken = default)
@@ -64,7 +56,7 @@ namespace KN.SafeCommunicationPlatform.Protocols
             {
                 throw new InvalidOperationException("Connection is not connected");
             }
-            return await _transportHandler.ReceiveDataAsync(buffer, cancellationToken);
+            return await _transportHandler.ReceiveAsync(buffer, cancellationToken);
         }
 
         public async ValueTask CloseAsync(Exception? exception = null, CancellationToken cancellationToken = default)

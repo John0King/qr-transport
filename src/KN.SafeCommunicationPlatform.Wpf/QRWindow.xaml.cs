@@ -1,11 +1,18 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using KN.SafeCommunicationPlatform.EF;
 using KN.SafeCommunicationPlatform.Protocols;
+using KN.SafeCommunicationPlatform.Protocols.TransportLayer;
 using KN.SafeCommunicationPlatform.Wpf.Qr;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Internal;
 using SkiaSharp;
 using System;
+using System.Buffers;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Drawing;
+using System.IO;
+using System.IO.Pipelines;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
@@ -28,52 +35,185 @@ namespace KN.SafeCommunicationPlatform.Wpf
     {
         private readonly SkiaQrWriter _qrWriter;
         private readonly UsbQrGunReader _qrGunReader;
-        private QrConnection? qrConnection;
-        private AppDbContext? db;
+        //private QrConnection? qrConnection;
+        private EventBaseTransportHandler? connection;
         public QRWindow()
         {
             this.DataContext = this;
             InitializeComponent();
 
-            _qrWriter = new SkiaQrWriter((map) => this.QrBitmap = map);
-            _qrGunReader =  new UsbQrGunReader();
+            _qrWriter = new SkiaQrWriter((map) => Dispatcher.Invoke(()=> this.QrBitmap = map));
+            _qrGunReader = new UsbQrGunReader();
             _qrGunReader.Readed += OnQrRead;
             IsCanConnect = true;
             Loaded += Init;
         }
 
-        private async void Init(object? sender, EventArgs e)
+        private void Init(object? sender, EventArgs e)
+        {
+            try
+            {
+                //qrConnection?.Dispose();
+                //qrConnection = QrConnection.CreateBuilder()
+                //    .WithQrWriter(_qrWriter)
+                //    .WithQrReader(_qrGunReader)
+                //    .Build();
+                //await qrConnection.ConnectAsync();
+                using (var db = CreateDbContext())
+                {
+                    db.Database.EnsureCreated();
+                }
+
+
+                this.connection = new EventBaseTransportHandler(_qrGunReader, _qrWriter);
+                connection.Received += OnReceiveMessage;
+                connection.Errored += async (e) =>
+                {
+                    MessageBox.Show(e.ToString());
+                    //log
+                };
+                connection.Closed += async () =>
+                {
+                    MessageBox.Show($"链接已关闭");
+                };
+                connection.Listen();
+
+                //_ = StartReceiveQuene();
+                _ = StartSendingQueue();
+            }
+            finally
+            {
+                //IsCanConnect = qrConnection?.State == QrConnectionState.Closed;
+                //IsCanDisConnect = qrConnection?.State == QrConnectionState.Connected;
+            }
+
+
+        }
+
+        static DbContextOptions<AppDbContext> dbOption = new DbContextOptionsBuilder<AppDbContext>()
+                    .UseSqlite("Data Source=mydb.db")
+                    .Options;
+
+        private AppDbContext CreateDbContext()
         {
             
-            qrConnection?.Dispose();
-            qrConnection = QrConnection.CreateBuilder()
-                .WithQrWriter(_qrWriter)
-                .WithQrReader(_qrGunReader)
-                .Build();
-            await qrConnection.ListenAsync();
-
+            var db = new AppDbContext(dbOption);
+            return db;
         }
-
         private Task StartSendingQueue()
         {
-            return Task.Factory.StartNew(() =>
+            return Task.Factory.StartNew(async () =>
             {
+                while (true)
+                {
+                    try
+                    {
+                        using (var db = CreateDbContext())
+                        {
 
-            },TaskCreationOptions.LongRunning);
+
+                            var result = db.SendingData.Where(x => x.Processed == false).OrderBy(x => x.AddTime)
+                            .ToList();
+                            foreach (var item in result)
+                            {
+                                if (item.IsProcessing(TimeSpan.FromMinutes(1)))
+                                {
+                                    continue;
+                                }
+                                item.ProcessingTime = DateTimeOffset.UtcNow;
+                                await db.SaveChangesAsync();
+                                try
+                                {
+                                    var str = System.Text.Json.JsonSerializer.Serialize(item);
+                                    await connection!.SendAsync(new MemoryStream(Encoding.UTF8.GetBytes(str)));
+                                    item.Processed = true;
+                                    await db.SaveChangesAsync();
+                                }
+                                catch (Exception ex)
+                                {
+                                    item.ProcessingTime = null;
+                                    item.Processed = false;
+                                    await db.SaveChangesAsync();
+                                }
+                            }
+                            await Task.Delay(1000);
+                        }
+                    }
+                    catch(Exception ex)
+                    {
+                        Debug.WriteLine(ex.ToString());
+                    }
+                }
+            }, TaskCreationOptions.LongRunning);
         }
 
-        private async Task StartReceiveQuene()
+        //private Task StartReceiveQuene()
+        //{
+        //    return Task.Factory.StartNew(async () =>
+        //    {
+        //        if (qrConnection != null)
+        //        {
+        //            using var owner = MemoryPool<byte>.Shared.Rent(Packet.MaxPayload);
+
+        //            while (true)
+        //            {
+        //                var result = await qrConnection.ReceiveAsync(owner.Memory);
+        //                if (result.MessageType == MessageType.Binary)
+        //                {
+        //                    var pipe = new Pipe();
+        //                    using (var stream = pipe.Writer.AsStream())
+        //                    {
+        //                        while (!result.EndOfMessage)
+        //                        {
+
+        //                            await stream.WriteAsync(owner.Memory[0..result.Count]);
+
+        //                        }
+        //                    }
+
+        //                    using (var reader = new StreamReader(pipe.Reader.AsStream()))
+        //                    {
+        //                        var json = await reader.ReadToEndAsync();
+        //                        var data = System.Text.Json.JsonSerializer.Deserialize<SendingData>(json)!;
+        //                        var dbData = data.ToReceiveData();
+        //                        db!.Add(dbData);
+        //                        await db.SaveChangesAsync();
+        //                    }
+
+        //                }
+        //                else if (result.MessageType == MessageType.Close)
+        //                {
+        //                    break;
+        //                }
+        //            }
+        //        }
+        //    },TaskCreationOptions.LongRunning);
+        //}
+
+        private async Task OnReceiveMessage(Stream stream)
         {
-
+            using(var db = CreateDbContext())
+            {
+                using(var reader = new StreamReader(stream))
+                {
+                    var str = await reader.ReadToEndAsync();
+                    var sendingData = System.Text.Json.JsonSerializer.Deserialize<SendingData>(str);
+                    var receiveData = sendingData?.ToReceiveData();
+                    if(receiveData != null)
+                    {
+                        db.Add(receiveData);
+                        await db.SaveChangesAsync();
+                    }
+                }
+            }
         }
-       
         private void OnQrRead(byte[] buffer)
         {
             Dispatcher.Invoke(() =>
             {
                 this.qr_r_txt.Text = Convert.ToBase64String(buffer);
             });
-            
+
         }
 
         public bool IsCanConnect
@@ -99,6 +239,8 @@ namespace KN.SafeCommunicationPlatform.Wpf
            DependencyProperty.Register(nameof(IsCanDisConnect), typeof(bool), typeof(QRWindow), new PropertyMetadata(false));
 
         public static DependencyProperty QrBitmapProperty = DependencyProperty.Register(nameof(QrBitmap), typeof(SKBitmap), typeof(QRWindow));
+
+
         public SKBitmap QrBitmap
         {
             get
@@ -127,21 +269,21 @@ namespace KN.SafeCommunicationPlatform.Wpf
 
         private async void ConnectButton_Click(object sender, RoutedEventArgs e)
         {
-            try
-              {
-                if (qrConnection != null)
-                {
-                    await qrConnection.ConnectAsync();
-                }
+            //try
+            //{
+            //    if (qrConnection != null)
+            //    {
+            //        await qrConnection.ConnectAsync();
+            //    }
 
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show(ex.Message);
-            }
+            //}
+            //catch (Exception ex)
+            //{
+            //    MessageBox.Show(ex.Message);
+            //}
         }
 
-        
+
 
         private void DecodeQr(SKBitmap bitmap)
         {
@@ -153,8 +295,15 @@ namespace KN.SafeCommunicationPlatform.Wpf
                 }
             };
             var result = reader.Decode(this.QrBitmap);
-            this.qr_s_txt.Text = Convert.ToBase64String(((List<byte[]>)result.ResultMetadata[ZXing.ResultMetadataType.BYTE_SEGMENTS])
+            if(result!= null)
+            {
+                this.qr_s_txt.Text = Convert.ToBase64String(((List<byte[]>)result.ResultMetadata[ZXing.ResultMetadataType.BYTE_SEGMENTS])
                 .SelectMany(x => x).ToArray());
+            }
+            else
+            {
+                this.qr_r_txt.Text = "<null>";
+            }
         }
     }
 }

@@ -13,6 +13,7 @@ namespace KN.SafeCommunicationPlatform.Protocols.TransportLayer
     public class PacketWriter:IDisposable
     {
         private IQrWriter qrWriter;
+        private readonly SemaphoreSlim _semaphoreSlim = new SemaphoreSlim(1,1);
 
         public PacketWriter(IQrWriter qrWriter)
         {
@@ -34,7 +35,7 @@ namespace KN.SafeCommunicationPlatform.Protocols.TransportLayer
         /// <param name="packet"></param>
         /// <param name="destination">应为1040字节 </param>
         /// <returns>byte write</returns>
-        internal int Write(ref Packet packet,Span<byte> destination)
+        private int Write(ref Packet packet,Span<byte> destination)
         {
             int byteWrite = 0;
             BinaryPrimitives.WriteUInt32BigEndian(destination.Slice(0, 4), packet.SessionId);
@@ -47,15 +48,25 @@ namespace KN.SafeCommunicationPlatform.Protocols.TransportLayer
             byteWrite += 2;
             BinaryPrimitives.WriteUInt32BigEndian(destination.Slice(12, 4), packet.PacketSize);
             byteWrite += 4;
-            packet.Payload.CopyTo(destination.Slice(0, 4));
+            packet.Payload.CopyTo(destination.Slice(byteWrite, (int)packet.PacketSize));
             byteWrite += (int)packet.PacketSize;
             return byteWrite;
         }
 
-        public void WritePacket(ref Packet packet)
+        public async ValueTask WritePacket(Packet packet)
         {
-            var size = Write(ref packet, MemoryOwner.Memory.Span);
-            qrWriter.WriteQrData(MemoryOwner.Memory.Span.Slice(0, size));
+            try
+            {
+                await _semaphoreSlim.WaitAsync();
+                var size = Write(ref packet, MemoryOwner.Memory.Span);
+                qrWriter.WriteQrData(MemoryOwner.Memory.Span.Slice(0, size));
+                await Task.Delay(200);
+            }
+            finally
+            {
+                _semaphoreSlim.Release();
+            }
+            
         }
     }
 }

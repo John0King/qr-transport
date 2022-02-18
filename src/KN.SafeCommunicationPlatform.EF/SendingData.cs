@@ -29,7 +29,7 @@ namespace KN.SafeCommunicationPlatform.EF
                 BinaryData = BinaryData,
                 AddTime = AddTime,
                 Processed = false,
-                Processing = false,
+                ProcessingTime = null,
                 ProcessTime = null
             };
         }
