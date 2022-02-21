@@ -2,7 +2,6 @@ using KN.SafeCommunicationPlatform.Hubs;
 using System.Buffers;
 
 var builder = WebApplication.CreateBuilder(args);
-
 // Add services to the container.
 builder.Services.AddMvc();
 builder.Services.AddSignalR();

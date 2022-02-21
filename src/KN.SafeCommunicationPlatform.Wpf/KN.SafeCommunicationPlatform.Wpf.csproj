@@ -12,8 +12,13 @@
 
   <ItemGroup>
     <PackageReference Include="CommunityToolkit.Mvvm" Version="8.0.0-preview1" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="6.0.0" />
     <PackageReference Include="OpenCvSharp4.Windows" Version="4.5.5.20211231" />
     <PackageReference Include="OpenCvSharp4.WpfExtensions" Version="4.5.5.20211231" />
+    <PackageReference Include="Serilog.AspNetCore" Version="5.0.0" />
+    <PackageReference Include="Serilog.Extensions.Logging" Version="3.1.0" />
+    <PackageReference Include="Serilog.Settings.Configuration" Version="3.3.0" />
+    <PackageReference Include="Serilog.Sinks.File" Version="5.0.0" />
     <PackageReference Include="SkiaSharp.Views.WPF" Version="2.88.0-preview.187" />
     <PackageReference Include="System.Drawing.Common" Version="6.0.0" />
     <PackageReference Include="ZXing.Net.Bindings.OpenCV.V4" Version="0.16.8" />
@@ -24,6 +29,17 @@
   <ItemGroup>
     <ProjectReference Include="..\KN.SafeCommunicationPlatform.EF\KN.SafeCommunicationPlatform.EF.csproj" />
     <ProjectReference Include="..\KN.SafeCommunicationPlatform.Protocols\KN.SafeCommunicationPlatform.Protocols.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Controls\" />
+    <Folder Include="Themes\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="appsettings.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
 
 </Project>

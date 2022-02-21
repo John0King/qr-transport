@@ -18,10 +18,11 @@ namespace KN.SafeCommunicationPlatform.EF
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
-            modelBuilder.UseCollation("NOCASE");
+            
 
             if (Database.ProviderName == "Microsoft.EntityFrameworkCore.Sqlite")
             {
+                modelBuilder.UseCollation("NOCASE");
                 // SQLite does not have proper support for DateTimeOffset via Entity Framework Core, see the limitations
                 // here: https://docs.microsoft.com/en-us/ef/core/providers/sqlite/limitations#query-limitations
                 // To work around this, when the Sqlite database provider is used, all model properties of type DateTimeOffset

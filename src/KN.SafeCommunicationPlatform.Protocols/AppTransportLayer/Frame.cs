@@ -7,14 +7,18 @@ using System.Runtime.InteropServices;
 
 namespace KN.SafeCommunicationPlatform.Protocols.AppTransportLayer
 {
-    [StructLayout(LayoutKind.Sequential, Pack = 0, Size = 2048)]
+    [StructLayout(LayoutKind.Sequential, Pack = 1, Size = 2048)]
     public struct FileFrame
     {
+        public FileFrame()
+        {
+
+        }
         public readonly byte Mark = 0xFA;
-        public FrameOp OpCode;
-        public ulong ContentLength;
-        public uint ContentIndex;
-        public uint ContentIndxCount;
+        public FrameOp OpCode = FrameOp.New;
+        public ulong ContentLength = 0;
+        public uint ContentIndex = 0;
+        public uint ContentIndxCount = 0;
 
         /// <summary>
         /// Sha1 Hash

@@ -5,6 +5,8 @@ using KN.SafeCommunicationPlatform.Protocols.TransportLayer;
 using KN.SafeCommunicationPlatform.Wpf.Qr;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Internal;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using SkiaSharp;
 using System;
 using System.Buffers;
@@ -37,10 +39,16 @@ namespace KN.SafeCommunicationPlatform.Wpf
         private readonly UsbQrGunReader _qrGunReader;
         //private QrConnection? qrConnection;
         private EventBaseTransportHandler? connection;
+
+        private IServiceProvider ServiceProvider { get; set; }
+
+        private readonly ILogger _logger;
         public QRWindow()
         {
             this.DataContext = this;
             InitializeComponent();
+            ServiceProvider = ((App)System.Windows.Application.Current).ServiceProvider;
+            _logger = ServiceProvider.GetRequiredService<ILogger<QRWindow>>();
 
             _qrWriter = new SkiaQrWriter((map) => Dispatcher.Invoke(()=> this.QrBitmap = map));
             _qrGunReader = new UsbQrGunReader();
@@ -59,8 +67,10 @@ namespace KN.SafeCommunicationPlatform.Wpf
                 //    .WithQrReader(_qrGunReader)
                 //    .Build();
                 //await qrConnection.ConnectAsync();
-                using (var db = CreateDbContext())
+                _logger.LogInformation("QrWindow Loaded-> Init()");
+                using(var scope = ServiceProvider.CreateScope())
                 {
+                    var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
                     db.Database.EnsureCreated();
                 }
 
@@ -69,11 +79,13 @@ namespace KN.SafeCommunicationPlatform.Wpf
                 connection.Received += OnReceiveMessage;
                 connection.Errored += async (e) =>
                 {
+                    _logger.LogError(e, "QrConnection Error");
                     MessageBox.Show(e.ToString());
                     //log
                 };
                 connection.Closed += async () =>
                 {
+                    _logger.LogInformation("QrConnection Close");
                     MessageBox.Show($"链接已关闭");
                 };
                 connection.Listen();
@@ -90,16 +102,7 @@ namespace KN.SafeCommunicationPlatform.Wpf
 
         }
 
-        static DbContextOptions<AppDbContext> dbOption = new DbContextOptionsBuilder<AppDbContext>()
-                    .UseSqlite("Data Source=mydb.db")
-                    .Options;
 
-        private AppDbContext CreateDbContext()
-        {
-            
-            var db = new AppDbContext(dbOption);
-            return db;
-        }
         private Task StartSendingQueue()
         {
             return Task.Factory.StartNew(async () =>
@@ -108,9 +111,9 @@ namespace KN.SafeCommunicationPlatform.Wpf
                 {
                     try
                     {
-                        using (var db = CreateDbContext())
+                        using (var scope = ServiceProvider.CreateScope())
                         {
-
+                            var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
 
                             var result = db.SendingData.Where(x => x.Processed == false).OrderBy(x => x.AddTime)
                             .ToList();
@@ -131,6 +134,7 @@ namespace KN.SafeCommunicationPlatform.Wpf
                                 }
                                 catch (Exception ex)
                                 {
+                                    _logger.LogError(ex, "Sending Error");
                                     item.ProcessingTime = null;
                                     item.Processed = false;
                                     await db.SaveChangesAsync();
@@ -192,9 +196,10 @@ namespace KN.SafeCommunicationPlatform.Wpf
 
         private async Task OnReceiveMessage(Stream stream)
         {
-            using(var db = CreateDbContext())
+            using (var scope = ServiceProvider.CreateScope())
             {
-                using(var reader = new StreamReader(stream))
+                var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+                using (var reader = new StreamReader(stream))
                 {
                     var str = await reader.ReadToEndAsync();
                     var sendingData = System.Text.Json.JsonSerializer.Deserialize<SendingData>(str);
@@ -266,24 +271,6 @@ namespace KN.SafeCommunicationPlatform.Wpf
                 e.Surface.Canvas.DrawColor(SKColor.Parse("#cccccc"));
             }
         }
-
-        private async void ConnectButton_Click(object sender, RoutedEventArgs e)
-        {
-            //try
-            //{
-            //    if (qrConnection != null)
-            //    {
-            //        await qrConnection.ConnectAsync();
-            //    }
-
-            //}
-            //catch (Exception ex)
-            //{
-            //    MessageBox.Show(ex.Message);
-            //}
-        }
-
-
 
         private void DecodeQr(SKBitmap bitmap)
         {

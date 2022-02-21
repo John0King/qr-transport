@@ -14,17 +14,17 @@
         </Grid.ColumnDefinitions>
         <!--左侧面版-->
         <DockPanel Margin="0,0,5,0">
-            <StackPanel Orientation="Horizontal" DockPanel.Dock="Top" VerticalAlignment="Top">
+            <!--<StackPanel Orientation="Horizontal" DockPanel.Dock="Top" VerticalAlignment="Top">
                 <Button Height="40" HorizontalAlignment="Center" Padding="50,0" Click="ConnectButton_Click" IsEnabled="{Binding IsCanConnect}">连接</Button>
                 <Button Height="40" HorizontalAlignment="Center" Padding="50,0" IsEnabled="{Binding IsCanDisConnect}">断开</Button>
-            </StackPanel>
+            </StackPanel>-->
             <StackPanel>
                 <Label>QR Sending (Base64）</Label>
                 <TextBox x:Name="qr_s_txt" TextWrapping="Wrap"  Height="90"></TextBox>
                 <Label>QR Receive （Base64）</Label>
                 <TextBox x:Name="qr_r_txt" TextWrapping="Wrap"  Height="90"></TextBox>
-                <Label>发送消息</Label>
-                <Grid Height="100">
+                <!--<Label>发送消息</Label>-->
+                <!--<Grid Height="100">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*"/>
                         <ColumnDefinition Width="100"/>
@@ -39,7 +39,7 @@
                         <ColumnDefinition Width="100"/>
                     </Grid.ColumnDefinitions>
                     <TextBox x:Name="ReveidData" />
-                </Grid>
+                </Grid>-->
             </StackPanel>
         </DockPanel>
         <Border Grid.Column="1" BorderBrush="black" BorderThickness="1,0,0,0" ClipToBounds="True">
