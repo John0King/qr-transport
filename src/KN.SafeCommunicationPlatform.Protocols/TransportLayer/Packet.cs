@@ -35,9 +35,12 @@ namespace KN.SafeCommunicationPlatform.Protocols.TransportLayer
     {
         Send = 0x01,
         Close = 0x02,
+        Receive = 0x03,
         Ack = 0x10,
         Repeat = 0x11,
         Ping = 0x20,
         Pong = 0x21,
+        Hello = 0x30,
+        ReceiveResult = 0x31,
     }
 }

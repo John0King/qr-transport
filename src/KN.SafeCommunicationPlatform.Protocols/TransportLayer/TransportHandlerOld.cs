@@ -10,6 +10,7 @@ using System.Buffers;
 using System.Threading.Tasks.Sources;
 using Timer = System.Timers.Timer;
 using KN.SafeCommunicationPlatform.Protocols.Internal;
+using KN.SafeCommunicationPlatform.Protocols.QrSockets;
 using System.Threading.Channels;
 using System.Collections.Concurrent;
 
@@ -58,7 +59,7 @@ namespace KN.SafeCommunicationPlatform.Protocols.TransportLayer
 
         private PacketReader PacketReader { get; }
         private PacketWriter PacketWriter { get; }
-        public QrConnectionState State { get; internal set; }
+        public QrSocketState State { get; internal set; }
 
         public async ValueTask SendData(Memory<byte> buffer, bool endOfMessage, CancellationToken cancellationToken)
         {

@@ -1,33 +1,33 @@
 ﻿using KN.SafeCommunicationPlatform.Protocols.Qr;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace KN.SafeCommunicationPlatform.Protocols.QrSockets
 {
-    public class QrSocketFactory
+    public sealed class QrSocketFactory
     {
         private readonly IQrReader _reader;
         private readonly IQrWriter _writer;
 
         public QrSocketFactory(IQrReader reader, IQrWriter writer)
         {
+            ArgumentNullException.ThrowIfNull(reader);
+            ArgumentNullException.ThrowIfNull(writer);
+
             _reader = reader;
             _writer = writer;
         }
 
-        public ValueTask<bool> ConnectAsync()
+        public ValueTask<QrSocket> CreateAsync(CancellationToken cancellationToken = default)
         {
-            _reader.StartRead();
-            return ValueTask.FromResult(true);
+            return AcceptAsync(cancellationToken);
         }
 
-        public ValueTask<QrSocket> AcceptAsync()
+        public async ValueTask<QrSocket> AcceptAsync(CancellationToken cancellationToken = default)
         {
-            return ValueTask.FromResult(new QrSocket())
+            _reader.StartRead();
+
+            var socket = new QrSocket(_reader, _writer);
+            await socket.ConnectAsync(cancellationToken);
+            return socket;
         }
-        
     }
 }
