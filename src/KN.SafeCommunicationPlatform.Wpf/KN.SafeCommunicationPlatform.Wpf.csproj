@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
-    <TargetFramework>net6.0-windows</TargetFramework>
+    <TargetFramework>net10.0-windows</TargetFramework>
     <Nullable>enable</Nullable>
     <UseWPF>true</UseWPF>
   </PropertyGroup>
@@ -12,7 +12,7 @@
 
   <ItemGroup>
     <PackageReference Include="CommunityToolkit.Mvvm" Version="8.0.0-preview1" />
-    <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="6.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="10.0.8" />
     <PackageReference Include="OpenCvSharp4.Windows" Version="4.5.5.20211231" />
     <PackageReference Include="OpenCvSharp4.WpfExtensions" Version="4.5.5.20211231" />
     <PackageReference Include="Serilog.AspNetCore" Version="5.0.0" />
@@ -20,7 +20,7 @@
     <PackageReference Include="Serilog.Settings.Configuration" Version="3.3.0" />
     <PackageReference Include="Serilog.Sinks.File" Version="5.0.0" />
     <PackageReference Include="SkiaSharp.Views.WPF" Version="2.88.0-preview.187" />
-    <PackageReference Include="System.Drawing.Common" Version="6.0.0" />
+    <PackageReference Include="System.Drawing.Common" Version="10.0.8" />
     <PackageReference Include="ZXing.Net.Bindings.OpenCV.V4" Version="0.16.8" />
     <PackageReference Include="ZXing.Net.Bindings.SkiaSharp" Version="0.16.12" />
     <PackageReference Include="KN.SafeCommunicationPlatform.Native" Version="*" />
